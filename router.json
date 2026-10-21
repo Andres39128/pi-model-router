@@ -1,0 +1,41 @@
+{
+  "ladder": [
+    {
+      "provider": "opencode-go",
+      "id": "deepseek-v4.1-flash",
+      "tier": "local"
+    },
+    {
+      "provider": "zhipuai-coding-plan",
+      "id": "glm-5.3-flash",
+      "tier": "flash"
+    },
+    {
+      "provider": "zhipuai-coding-plan",
+      "id": "glm-5.3",
+      "tier": "frontier"
+    }
+  ],
+  "classifier": {
+    "mode": "auto",
+    "url": "http://127.0.0.1:8090",
+    "timeoutMs": 1500,
+    "complexFloor": 0.4
+  },
+  "vision": {
+    "provider": "minimax",
+    "id": "MiniMax-M3"
+  },
+  "solver": {
+    "provider": "openai",
+    "id": "gpt-6.1-sol"
+  },
+  "privacy": {
+    "provider": "llamacpp",
+    "id": "Qwen3.8-27B"
+  },
+  "compaction": {
+    "provider": "minimax",
+    "id": "MiniMax-M3"
+  }
+}
