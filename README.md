@@ -8,7 +8,7 @@ Runs in production against a 3-tier ladder: a local chat model, a cheap cloud de
 
 | # | Rule | Trigger | Target |
 |---|------|---------|--------|
-| R6 | **Privacy** | Secret VALUES in the current turn: assignments (`password=…`), key literals (`sk-…`, PEM, `AKIA…`), credential URLs, secret-named env bulk | local model, fail-closed (visible error if the local model is down) |
+| R6 | **Privacy** | Explicit `:secret` marker typed in the current turn — automatic detection is OFF by policy; the user owns the decision | local model, fail-closed (visible error if the local model is down) |
 | F28 | **Context fit** | Conversation bigger than a model's context window | Skip every model that cannot fit it; overflow retries go to the largest window |
 | F15 | **Solver mention** | User names the solver in the turn (`/gpt-6.1-sol/`) | solver model, that turn only |
 | F7 | **Explicit level** | `router/auto:xhigh` | solver model |
@@ -17,7 +17,7 @@ Runs in production against a 3-tier ladder: a local chat model, a cheap cloud de
 | F29 | **Cache hysteresis** | Voluntary tier flip on a big conversation without a strong signal | keep the previous model (`why:"cache"`) |
 | R1 | **Tier routing** | Heuristic score / classifier / role floors | ladder tier |
 
-The current-turn text drives intent: compaction summaries, pasted warnings, and history artifacts never tier a request (only real key shapes in history keep a session local).
+The current-turn text drives intent: compaction summaries, pasted warnings, and history artifacts never tier a request. Privacy is opt-in via `:secret` — the detector still logs what it sees, but only the marker routes.
 
 ### Tier semantics (roles, not scores)
 
@@ -92,7 +92,7 @@ Every decision is appended to `decisions.jsonl` next to the extension source (mo
 ## Behavior notes
 
 - **Effort levels**: tiers dispatch `local/flash → high`, `frontier → max`, solver → `xhigh`. Add a `thinkingLevelMap` identity entry to models that support more than the default ladder so Pi does not clamp levels.
-- **Fail-closed privacy**: secrets + dead local model = visible routing failure, never a silent cloud fallback.
+- **Explicit privacy**: `:secret` in the turn routes local, fails closed if the local model is down, and survives retries; secret-shaped content without the marker routes normally.
 - **Overflow recovery**: `exceed_context_size_error` retries route to the largest fitting window; if none fits, the router returns null (the session must compact).
 - **Compaction**: `direct` compaction requests route to the configured `compaction` model — unless the conversation carries secrets, then local.
 
